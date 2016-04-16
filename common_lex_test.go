@@ -1,6 +1,10 @@
 package magic
 
-import "testing"
+import (
+	"fmt"
+	"io/ioutil"
+	"testing"
+)
 
 func TestCommon_LexATXHeading(t *testing.T) {
 	sample :=
@@ -29,4 +33,20 @@ func TestCommon_LexATXHeading(t *testing.T) {
 			t.Errorf(" expected %s fot %s", v.src, tkns[0].Text)
 		}
 	}
+}
+
+func TestCommon_LexBlankline(t *testing.T) {
+	b, err := ioutil.ReadFile("fixture/lex/blankline.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := &Common{}
+	l := Lexer{}
+	l.IsBlock = c.IsBlock
+	l.LFunc = c.Lex
+	tk, err := l.Lex(b)
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Println(tk)
 }
