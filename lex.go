@@ -32,6 +32,7 @@ const (
 	HardLineBreak
 	SoftLineBreak
 	Text
+	Whitespace
 )
 
 func (k TokenKind) String() string {
@@ -80,6 +81,8 @@ func (k TokenKind) String() string {
 		return "SoftLineBreak"
 	case Text:
 		return "Text"
+	case LexWHitespace:
+		return "Whitespace"
 	}
 	return "unkown"
 }
