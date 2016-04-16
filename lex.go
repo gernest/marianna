@@ -29,6 +29,56 @@ const (
 	Text
 )
 
+func (k TokenKind) String() string {
+	switch k {
+	case Break:
+		return "Break"
+	case ATXHeading:
+		return "ATXHeading"
+	case SelectHeading:
+		return "SelectHeading"
+	case IndentCode:
+		return "IndentCode"
+	case FencedCode:
+		return "FencedCode"
+	case HTML:
+		return "HTML"
+	case LinkReference:
+		return "LinkReference"
+	case Paragraph:
+		return "Paragraph"
+	case Blankline:
+		return "Blankline"
+	case Quote:
+		return "Quote"
+	case List:
+		return "List"
+	case ListItem:
+		return "ListItem"
+	case Escape:
+		return "Escape"
+	case EntityReference:
+		return "EntityReference"
+	case CodeSpan:
+		return "CodeSpan"
+	case Emphasis:
+		return "Emphasis"
+	case StrongEmphasis:
+		return "StrongEmphasis"
+	case Link:
+		return "Link"
+	case Image:
+		return "Image"
+	case HardLineBreak:
+		return "HardLineBreak"
+	case SoftLineBreak:
+		return "SoftLineBreak"
+	case Text:
+		return "Text"
+	}
+	return "unkown"
+}
+
 type Token struct {
 	Kind  TokenKind
 	Text  string
