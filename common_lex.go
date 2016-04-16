@@ -21,6 +21,8 @@ func (c *Common) Lex(data []byte, currPos int, atEOF bool) (int, *Token, error) 
 	switch ch {
 	case '#':
 		return c.LexATXHeading(data, currPos, atEOF)
+	case '\r', '\n':
+		return c.LexBlankline(data, currPos, atEOF)
 	}
 	return len(data), nil, nil
 }
@@ -98,4 +100,19 @@ STOP:
 //IsLiteral checks rune ch if it is a commonmark literal
 func IsLiteral(ch rune) bool {
 	return unicode.IsLetter(ch) || unicode.IsDigit(ch)
+}
+
+func (c *Common) LexBlankline(data []byte, currPos int, atEOF bool) (int, *Token, error) {
+	end := currPos
+	if currPos > len(data)-1 {
+		return len(data), nil, nil
+	}
+	ch, size := utf8.DecodeRune(data[end:])
+	if ch == '\r' || ch == '\n' {
+		end += size
+		t :=
+			&Token{Kind: Blankline, Begin: currPos, End: end, Text: string(ch)}
+		return end, t, nil
+	}
+	return len(data), nil, fmt.Errorf(" at %d txt: %s  failed to lex blankline", currPos, string(ch))
 }
