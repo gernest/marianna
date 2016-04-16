@@ -6,13 +6,16 @@ import (
 	"unicode/utf8"
 )
 
+//Common implements lexer for commonmark
 type Common struct {
 }
 
+//IsBlock returns true if the token kind is Block element and false otherwise
 func (c *Common) IsBlock(k TokenKind) bool {
 	return k == Quote || k == ListItem
 }
 
+//Lex implements LexFunc for common mark
 func (c *Common) Lex(data []byte, currPos int, atEOF bool) (int, *Token, error) {
 	ch, _ := utf8.DecodeRune(data)
 	switch ch {
@@ -22,6 +25,7 @@ func (c *Common) Lex(data []byte, currPos int, atEOF bool) (int, *Token, error) 
 	return len(data), nil, nil
 }
 
+//LexParagraph lexes commonmark paragraph
 func (c *Common) LexParagraph(data []byte, currPos int, atEOF bool) (int, *Token, error) {
 	ch, _ := utf8.DecodeRune(data)
 	if IsLiteral(ch) {
@@ -29,6 +33,7 @@ func (c *Common) LexParagraph(data []byte, currPos int, atEOF bool) (int, *Token
 	return len(data), nil, nil
 }
 
+//LexATXHeading lexes commonmark ATXHeading
 func (c *Common) LexATXHeading(data []byte, currPos int, atEOF bool) (int, *Token, error) {
 	start := currPos
 	end := currPos
@@ -90,6 +95,7 @@ STOP:
 	return end, t, nil
 }
 
+//IsLiteral checks rune ch if it is a commonmark literal
 func IsLiteral(ch rune) bool {
 	return unicode.IsLetter(ch) || unicode.IsDigit(ch)
 }
