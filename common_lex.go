@@ -102,6 +102,7 @@ func IsLiteral(ch rune) bool {
 	return unicode.IsLetter(ch) || unicode.IsDigit(ch)
 }
 
+//LexBlankline lexes blank line
 func (c *Common) LexBlankline(data []byte, currPos int, atEOF bool) (int, *Token, error) {
 	end := currPos
 	if currPos > len(data)-1 {
