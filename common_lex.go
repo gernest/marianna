@@ -17,12 +17,14 @@ func (c *Common) IsBlock(k TokenKind) bool {
 
 //Lex implements LexFunc for common mark
 func (c *Common) Lex(data []byte, currPos int, atEOF bool) (int, *Token, error) {
-	ch, _ := utf8.DecodeRune(data)
+	ch, size := utf8.DecodeRune(data)
 	switch ch {
 	case '#':
 		return c.LexATXHeading(data, currPos, atEOF)
 	case '\r', '\n':
 		return c.LexBlankline(data, currPos, atEOF)
+	case ' ':
+		return c.Lex(data, currPos+size, atEOF)
 	}
 	return len(data), nil, nil
 }
