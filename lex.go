@@ -115,12 +115,9 @@ func (l *Lexer) Lex(src []byte) ([]*Token, error) {
 	)
 STOP:
 	for {
-		if atEOF {
+		if currPos > len(src)-1 {
 			lerr = io.EOF
 			break STOP
-		}
-		if currPos > len(src)-1 {
-			atEOF = true
 		}
 		a, t, err := l.LFunc(src[currPos:], currPos, atEOF)
 		if err != nil {
