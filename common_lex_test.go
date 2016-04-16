@@ -1,7 +1,6 @@
 package magic
 
 import (
-	"fmt"
 	"io/ioutil"
 	"testing"
 )
@@ -48,5 +47,8 @@ func TestCommon_LexBlankline(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	fmt.Println(tk)
+	//fmt.Println(tk)
+	if len(tk) != 3 {
+		t.Errorf("expected %s got %s", 3, len(tk))
+	}
 }
