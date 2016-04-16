@@ -1,6 +1,9 @@
 package magic
 
-import "io"
+import (
+	"fmt"
+	"io"
+)
 
 type TokenKind int
 
@@ -84,6 +87,10 @@ type Token struct {
 	Text  string
 	Begin int
 	End   int
+}
+
+func (t *Token) String() string {
+	return fmt.Sprintf(" %s [ %d : %d]", t.Kind, t.Begin, t.End)
 }
 
 type LexFunc func(data []byte, currPos int, atEOF bool) (advanceAt int, tok *Token, err error)
