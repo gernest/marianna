@@ -5,8 +5,10 @@ import (
 	"io"
 )
 
+//TokenKind defines type of the token
 type TokenKind int
 
+// common token kinds
 const (
 	Break TokenKind = iota
 	ATXHeading
@@ -82,6 +84,7 @@ func (k TokenKind) String() string {
 	return "unkown"
 }
 
+//Token identifies a chunk of tex or a character with important meaning
 type Token struct {
 	Kind  TokenKind
 	Text  string
@@ -93,13 +96,16 @@ func (t *Token) String() string {
 	return fmt.Sprintf(" %s [ %d : %d]", t.Kind, t.Begin, t.End)
 }
 
+//LexFunc a function interface for lexing text inputs
 type LexFunc func(data []byte, currPos int, atEOF bool) (advanceAt int, tok *Token, err error)
 
+//Lexer text tokenizer
 type Lexer struct {
 	IsBlock func(TokenKind) bool
 	LFunc   LexFunc
 }
 
+//Lex returns a slice of tokens recognized from src
 func (l *Lexer) Lex(src []byte) ([]*Token, error) {
 	var (
 		currPos = 0
