@@ -26,6 +26,7 @@ func (c *Common) Lex(data []byte, currPos int) (int, *Token, error) {
 	case ' ':
 		return c.LexWHitespace(data, currPos)
 	}
+
 	return c.LexParagraph(data, currPos)
 }
 
@@ -165,11 +166,36 @@ func (c *Common) LexWHitespace(data []byte, currPos int) (int, *Token, error) {
 	}
 	if len(chars) > 3 {
 		// whatever foolows is a indented code blocko
+		return c.LexIndentCode(data, end)
 	}
 	t :=
 		&Token{Kind: Whitespace, Begin: currPos, End: end}
 	for _, v := range chars {
 		t.Text += string(v)
 	}
+	return end, t, nil
+}
+
+func (c *Common) LexIndentCode(data []byte, currPos int) (int, *Token, error) {
+	end := currPos
+	txt := ""
+STOP:
+	for {
+		if end > len(data)-1 {
+			break STOP
+		}
+		ch, size := utf8.DecodeRune(data[end:])
+		switch ch {
+		case '\n', '\r':
+			txt += string(ch)
+			end += size
+			break STOP
+		default:
+			txt += string(ch)
+			end += size
+		}
+	}
+	t :=
+		&Token{Kind: IndentCode, Begin: currPos, End: end, Text: txt}
 	return end, t, nil
 }

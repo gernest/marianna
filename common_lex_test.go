@@ -1,6 +1,7 @@
 package magic
 
 import (
+	"fmt"
 	"io/ioutil"
 	"testing"
 )
@@ -125,4 +126,23 @@ ccc`
 	if len(tk) != 1 {
 		t.Errorf("expected 1 got %d", len(tk))
 	}
+}
+
+func TestCommon_LexIndentCode(t *testing.T) {
+	b, err := ioutil.ReadFile("fixture/lex/simple_indent.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := &Common{}
+	l := Lexer{}
+	l.IsBlock = c.IsBlock
+	l.LFunc = c.Lex
+	tk, err := l.Lex(b)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(tk) != 2 {
+		t.Errorf("expected 2 got %d", len(tk))
+	}
+	fmt.Println(tk)
 }
