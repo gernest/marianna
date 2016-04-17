@@ -100,7 +100,7 @@ func (t *Token) String() string {
 }
 
 //LexFunc a function interface for lexing text inputs
-type LexFunc func(data []byte, currPos int, atEOF bool) (advanceAt int, tok *Token, err error)
+type LexFunc func(data []byte, currPos int) (advanceAt int, tok *Token, err error)
 
 //Lexer text tokenizer
 type Lexer struct {
@@ -113,7 +113,6 @@ func (l *Lexer) Lex(src []byte) ([]*Token, error) {
 	var (
 		currPos = 0
 		tokens  []*Token
-		atEOF   = false
 		lerr    error
 	)
 STOP:
@@ -122,7 +121,7 @@ STOP:
 			lerr = io.EOF
 			break STOP
 		}
-		a, t, err := l.LFunc(src, currPos, atEOF)
+		a, t, err := l.LFunc(src, currPos)
 		if err != nil {
 			lerr = err
 			break STOP

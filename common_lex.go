@@ -16,22 +16,21 @@ func (c *Common) IsBlock(k TokenKind) bool {
 }
 
 //Lex implements LexFunc for common mark
-func (c *Common) Lex(data []byte, currPos int, atEOF bool) (int, *Token, error) {
+func (c *Common) Lex(data []byte, currPos int) (int, *Token, error) {
 	ch, _ := utf8.DecodeRune(data[currPos:])
 	switch ch {
 	case '#':
-		return c.LexATXHeading(data, currPos, atEOF)
+		return c.LexATXHeading(data, currPos)
 	case '\r', '\n':
-		return c.LexBlankline(data, currPos, atEOF)
+		return c.LexBlankline(data, currPos)
 	case ' ':
-		return c.LexWHitespace(data, currPos, atEOF)
-
+		return c.LexWHitespace(data, currPos)
 	}
-	return c.LexParagraph(data, currPos, atEOF)
+	return c.LexParagraph(data, currPos)
 }
 
 //LexParagraph lexes commonmark paragraph
-func (c *Common) LexParagraph(data []byte, currPos int, atEOF bool) (int, *Token, error) {
+func (c *Common) LexParagraph(data []byte, currPos int) (int, *Token, error) {
 	ch, _ := utf8.DecodeRune(data)
 	if IsLiteral(ch) {
 	}
@@ -39,7 +38,7 @@ func (c *Common) LexParagraph(data []byte, currPos int, atEOF bool) (int, *Token
 }
 
 //LexATXHeading lexes commonmark ATXHeading
-func (c *Common) LexATXHeading(data []byte, currPos int, atEOF bool) (int, *Token, error) {
+func (c *Common) LexATXHeading(data []byte, currPos int) (int, *Token, error) {
 	end := currPos
 	txt := ""
 	ch, size := utf8.DecodeRune(data[end:])
@@ -71,7 +70,7 @@ func (c *Common) LexATXHeading(data []byte, currPos int, atEOF bool) (int, *Toke
 				}
 			}
 			if match > 6 {
-				return c.LexParagraph(data, currPos, atEOF)
+				return c.LexParagraph(data, currPos)
 			}
 		}
 	STOP:
@@ -95,7 +94,7 @@ func (c *Common) LexATXHeading(data []byte, currPos int, atEOF bool) (int, *Toke
 		return end, t, nil
 	}
 	//fmt.Println("HERE", string(data[currPos:]))
-	return c.LexParagraph(data, currPos, atEOF)
+	return c.LexParagraph(data, currPos)
 }
 
 //IsLiteral checks rune ch if it is a commonmark literal
@@ -104,7 +103,7 @@ func IsLiteral(ch rune) bool {
 }
 
 //LexBlankline lexes blank line
-func (c *Common) LexBlankline(data []byte, currPos int, atEOF bool) (int, *Token, error) {
+func (c *Common) LexBlankline(data []byte, currPos int) (int, *Token, error) {
 	end := currPos
 	if currPos > len(data)-1 {
 		return len(data), nil, nil
@@ -121,7 +120,7 @@ func (c *Common) LexBlankline(data []byte, currPos int, atEOF bool) (int, *Token
 
 //LexWHitespace lexes begin of the the line spaces. More than four white spaces
 //signifies an indented code block
-func (c *Common) LexWHitespace(data []byte, currPos int, atEOF bool) (int, *Token, error) {
+func (c *Common) LexWHitespace(data []byte, currPos int) (int, *Token, error) {
 	if currPos > len(data)-1 {
 		return len(data), nil, nil
 	}
