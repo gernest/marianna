@@ -43,7 +43,7 @@ STOP:
 		ch, size := utf8.DecodeRune(data[end:])
 		switch ch {
 		case '\n', '\r':
-			txt.WriteRune(ch)
+			_, _ = txt.WriteRune(ch)
 			end += size
 			if end > len(data)-1 {
 				break STOP
@@ -53,12 +53,12 @@ STOP:
 			case '\r', '\n':
 				break STOP
 			default:
-				txt.WriteRune(ch)
+				_, _ = txt.WriteRune(ch)
 				end += nsize
 			}
 
 		default:
-			txt.WriteRune(ch)
+			_, _ = txt.WriteRune(ch)
 			end += size
 		}
 	}
@@ -75,12 +75,12 @@ func (c *Common) LexATXHeading(data []byte, currPos int) (int, *Token, error) {
 	if ch == '#' {
 
 		end += size
-		txt.WriteRune(ch)
+		_, _ = txt.WriteRune(ch)
 		next, nsize := utf8.DecodeRune(data[end:])
 		switch next {
 		case ' ':
 			end += nsize
-			txt.WriteRune(next)
+			_, _ = txt.WriteRune(next)
 			goto STOP
 		case '#':
 			match := 2
@@ -89,10 +89,10 @@ func (c *Common) LexATXHeading(data []byte, currPos int) (int, *Token, error) {
 				hch, hsize := utf8.DecodeRune(data[end:])
 				switch hch {
 				case ' ':
-					txt.WriteRune(hch)
+					_, _ = txt.WriteRune(hch)
 					end += hsize
 				case '#':
-					txt.WriteRune(hch)
+					_, _ = txt.WriteRune(hch)
 					end += hsize
 					match++
 				default:
@@ -112,11 +112,11 @@ func (c *Common) LexATXHeading(data []byte, currPos int) (int, *Token, error) {
 			switch tch {
 			case '\r', '\n':
 				end += tsize
-				txt.WriteRune(tch)
+				_, _ = txt.WriteRune(tch)
 				break STOP
 			default:
 				end += tsize
-				txt.WriteRune(tch)
+				_, _ = txt.WriteRune(tch)
 			}
 		}
 		t :=
@@ -192,11 +192,11 @@ STOP:
 		ch, size := utf8.DecodeRune(data[end:])
 		switch ch {
 		case '\n', '\r':
-			txt.WriteRune(ch)
+			_, _ = txt.WriteRune(ch)
 			end += size
 			break STOP
 		default:
-			txt.WriteRune(ch)
+			_, _ = txt.WriteRune(ch)
 			end += size
 		}
 	}
