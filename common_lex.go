@@ -17,14 +17,14 @@ func (c *Common) IsBlock(k TokenKind) bool {
 
 //Lex implements LexFunc for common mark
 func (c *Common) Lex(data []byte, currPos int, atEOF bool) (int, *Token, error) {
-	ch, size := utf8.DecodeRune(data)
+	ch, _ := utf8.DecodeRune(data)
 	switch ch {
 	case '#':
 		return c.LexATXHeading(data, currPos, atEOF)
 	case '\r', '\n':
 		return c.LexBlankline(data, currPos, atEOF)
 	case ' ':
-		return c.Lex(data, currPos+size, atEOF)
+		return c.LexWHitespace(data, currPos, atEOF)
 	}
 	return len(data), nil, nil
 }
@@ -118,4 +118,32 @@ func (c *Common) LexBlankline(data []byte, currPos int, atEOF bool) (int, *Token
 		return end, t, nil
 	}
 	return len(data), nil, fmt.Errorf(" at %d txt: %s  failed to lex blankline", currPos, string(ch))
+}
+
+//LexWHitespace lexes begin of the the line spaces. More than four white spaces
+//signifies an indented code block
+func (c *Common) LexWHitespace(data []byte, currPos int, atEOF bool) (int, *Token, error) {
+	if currPos > len(data)-1 {
+		return len(data), nil, nil
+	}
+	end := currPos
+	var chars []rune
+	for {
+		ch, size := utf8.DecodeRune(data[end:])
+		if ch == ' ' {
+			chars = append(chars, ch)
+			end += size
+			continue
+		}
+		break
+	}
+	if len(chars) > 3 {
+		// whatever foolows is a indented code blocko
+	}
+	t :=
+		&Token{Kind: Whitespace, Begin: currPos, End: end}
+	for _, v := range chars {
+		t.Text += string(v)
+	}
+	return end, t, nil
 }

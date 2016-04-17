@@ -81,7 +81,7 @@ func (k TokenKind) String() string {
 		return "SoftLineBreak"
 	case Text:
 		return "Text"
-	case LexWHitespace:
+	case Whitespace:
 		return "Whitespace"
 	}
 	return "unkown"
