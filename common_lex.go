@@ -180,6 +180,7 @@ func (c *Common) LexWHitespace(data []byte, currPos int) (int, *Token, error) {
 	return end, t, nil
 }
 
+//LexIndentCode lexes indented code blocks
 func (c *Common) LexIndentCode(data []byte, currPos int) (int, *Token, error) {
 	end := currPos
 	txt := &bytes.Buffer{}
