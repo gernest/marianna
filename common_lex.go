@@ -31,10 +31,38 @@ func (c *Common) Lex(data []byte, currPos int) (int, *Token, error) {
 
 //LexParagraph lexes commonmark paragraph
 func (c *Common) LexParagraph(data []byte, currPos int) (int, *Token, error) {
-	ch, _ := utf8.DecodeRune(data)
-	if IsLiteral(ch) {
+	end := currPos
+	txt := ""
+STOP:
+	for {
+		if end > len(data)-1 {
+			break STOP
+		}
+		ch, size := utf8.DecodeRune(data[end:])
+		switch ch {
+		case '\n', '\r':
+			txt += string(ch)
+			end += size
+			if end > len(data)-1 {
+				break STOP
+			}
+			nch, nsize := utf8.DecodeRune(data[end:])
+			switch nch {
+			case '\r', '\n':
+				break STOP
+			default:
+				txt += string(ch)
+				end += nsize
+			}
+
+		default:
+			txt += string(ch)
+			end += size
+		}
 	}
-	return len(data), nil, nil
+	t :=
+		&Token{Kind: Paragraph, Begin: currPos, End: end, Text: txt}
+	return end, t, nil
 }
 
 //LexATXHeading lexes commonmark ATXHeading

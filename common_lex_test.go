@@ -64,3 +64,65 @@ func TestCommon_LexWHitespace(t *testing.T) {
 		t.Errorf("expected 2 got %d", len(tk))
 	}
 }
+
+func TestCommon_LexParagraph(t *testing.T) {
+	naormal := `aaa
+
+	aaa`
+	c := &Common{}
+	l := Lexer{}
+	l.IsBlock = c.IsBlock
+	l.LFunc = c.Lex
+	tk, err := l.Lex([]byte(naormal))
+	if err != nil {
+		t.Error(err)
+	}
+	if len(tk) != 3 {
+		t.Errorf("expected 3 got %d", len(tk))
+	}
+
+	multi := `aaa
+	bbb
+
+	ccc
+	ddd`
+	tk, err = l.Lex([]byte(multi))
+	if err != nil {
+		t.Error(err)
+	}
+	if len(tk) != 3 {
+		t.Errorf("expected 3 got %d", len(tk))
+	}
+	multiBlank := `aaa
+
+
+	bbb`
+	tk, err = l.Lex([]byte(multiBlank))
+	if err != nil {
+		t.Error(err)
+	}
+	if len(tk) != 4 {
+		t.Errorf("expected 4 got %d", len(tk))
+	}
+
+	leadSpace := `   aaa
+	bbb`
+	tk, err = l.Lex([]byte(leadSpace))
+	if err != nil {
+		t.Error(err)
+	}
+	if len(tk) != 2 {
+		t.Errorf("expected 2 got %d", len(tk))
+	}
+	indent := `aaa
+	         bbb
+		              			 
+ccc`
+	tk, err = l.Lex([]byte(indent))
+	if err != nil {
+		t.Error(err)
+	}
+	if len(tk) != 1 {
+		t.Errorf("expected 1 got %d", len(tk))
+	}
+}
