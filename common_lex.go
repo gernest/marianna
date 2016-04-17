@@ -66,7 +66,7 @@ func (c *Common) LexATXHeading(data []byte, currPos int, atEOF bool) (int, *Toke
 				case '#':
 					txt += string(hch)
 					end += hsize
-					match += 1
+					match++
 				default:
 					break HSTOP
 				}
