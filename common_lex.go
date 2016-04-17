@@ -25,10 +25,9 @@ func (c *Common) Lex(data []byte, currPos int, atEOF bool) (int, *Token, error) 
 		return c.LexBlankline(data, currPos, atEOF)
 	case ' ':
 		return c.LexWHitespace(data, currPos, atEOF)
-	default:
-		return c.LexParagraph(data, currPos, atEOF)
+
 	}
-	return len(data), nil, nil
+	return c.LexParagraph(data, currPos, atEOF)
 }
 
 //LexParagraph lexes commonmark paragraph
