@@ -17,7 +17,7 @@ func (c *Common) IsBlock(k TokenKind) bool {
 
 //Lex implements LexFunc for common mark
 func (c *Common) Lex(data []byte, currPos int, atEOF bool) (int, *Token, error) {
-	ch, _ := utf8.DecodeRune(data)
+	ch, _ := utf8.DecodeRune(data[currPos:])
 	switch ch {
 	case '#':
 		return c.LexATXHeading(data, currPos, atEOF)
@@ -25,6 +25,8 @@ func (c *Common) Lex(data []byte, currPos int, atEOF bool) (int, *Token, error) 
 		return c.LexBlankline(data, currPos, atEOF)
 	case ' ':
 		return c.LexWHitespace(data, currPos, atEOF)
+	default:
+		return c.LexParagraph(data, currPos, atEOF)
 	}
 	return len(data), nil, nil
 }
@@ -39,64 +41,62 @@ func (c *Common) LexParagraph(data []byte, currPos int, atEOF bool) (int, *Token
 
 //LexATXHeading lexes commonmark ATXHeading
 func (c *Common) LexATXHeading(data []byte, currPos int, atEOF bool) (int, *Token, error) {
-	start := currPos
 	end := currPos
-	var head []rune
-	var body []rune
-	isHead := true
-	var combineHeadWithBody = func(h []rune, b []rune) string {
-		rst := ""
-		for _, v := range h {
-			rst += string(v)
-		}
-		for _, v := range b {
-			rst += string(v)
-		}
-		return rst
-	}
-STOP:
-	for {
-	repeat:
-		if end > len(data)-1 {
-			break STOP
-		}
-		ch, size := utf8.DecodeRune(data[end:])
-		if isHead {
-			switch ch {
-			case '#':
-				head = append(head, ch)
-				end += size
-				goto repeat
-			case ' ':
-				isHead = false
-				end += size
-				body = append(body, ch)
-				goto repeat
-			default:
-				if len(head) == 1 && ch == '\n' {
-					break STOP
+	txt := ""
+	ch, size := utf8.DecodeRune(data[end:])
+	if ch == '#' {
+
+		end += size
+		txt += string(ch)
+		next, nsize := utf8.DecodeRune(data[end:])
+		switch next {
+		case ' ':
+			end += nsize
+			txt += string(next)
+			goto STOP
+		case '#':
+			match := 2
+		HSTOP:
+			for {
+				hch, hsize := utf8.DecodeRune(data[end:])
+				switch hch {
+				case ' ':
+					txt += string(hch)
+					end += hsize
+				case '#':
+					txt += string(hch)
+					end += hsize
+					match += 1
+				default:
+					break HSTOP
 				}
-				return len(data), nil, fmt.Errorf(" at %d wrong characher for heading", end)
+			}
+			if match > 6 {
+				return c.LexParagraph(data, currPos, atEOF)
 			}
 		}
-		switch ch {
-		case '\n', '\r':
-			end += size
-			break STOP
-		default:
-			end += size
-			body = append(body, ch)
+	STOP:
+		for {
+			if end > len(data)-1 {
+				break
+			}
+			tch, tsize := utf8.DecodeRune(data[end:])
+			switch tch {
+			case '\r', '\n':
+				end += tsize
+				txt += string(tch)
+				break STOP
+			default:
+				end += tsize
+				txt += string(tch)
+			}
 		}
-	}
-	t := &Token{Kind: ATXHeading, Begin: start, End: end}
-	if len(head) > 6 {
-		// This is a paragraph instead
-		t.Kind = Paragraph
-		t.Text = combineHeadWithBody(head, body)
+		t :=
+			&Token{Kind: ATXHeading, Begin: currPos, End: end, Text: txt}
 		return end, t, nil
 	}
-	t.Text = combineHeadWithBody(head, body)
-	return end, t, nil
+	//fmt.Println("HERE", string(data[currPos:]))
+	return c.LexParagraph(data, currPos, atEOF)
 }
 
 //IsLiteral checks rune ch if it is a commonmark literal

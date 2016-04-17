@@ -96,7 +96,7 @@ type Token struct {
 }
 
 func (t *Token) String() string {
-	return fmt.Sprintf(" %s [ %d : %d]", t.Kind, t.Begin, t.End)
+	return fmt.Sprintf(" %s [ %d : %d] %s", t.Kind, t.Begin, t.End, t.Text)
 }
 
 //LexFunc a function interface for lexing text inputs
@@ -122,7 +122,7 @@ STOP:
 			lerr = io.EOF
 			break STOP
 		}
-		a, t, err := l.LFunc(src[currPos:], currPos, atEOF)
+		a, t, err := l.LFunc(src, currPos, atEOF)
 		if err != nil {
 			lerr = err
 			break STOP

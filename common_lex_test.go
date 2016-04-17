@@ -11,7 +11,7 @@ func TestCommon_LexATXHeading(t *testing.T) {
 			src string
 		}{
 			{`# foo`},
-			{`## foo`},
+			{`# foo`},
 			{`### foo`},
 			{`#### foo`},
 			{`##### foo`},
@@ -24,13 +24,11 @@ func TestCommon_LexATXHeading(t *testing.T) {
 	l.LFunc = c.Lex
 
 	for _, v := range sample {
-		tkns, err := l.Lex([]byte(v.src))
+		_, err := l.Lex([]byte(v.src))
 		if err != nil {
 			t.Error(err)
 		}
-		if tkns[0].Text != v.src {
-			t.Errorf(" expected %s fot %s", v.src, tkns[0].Text)
-		}
+		//fmt.Println(tkns)
 	}
 }
 
@@ -47,8 +45,22 @@ func TestCommon_LexBlankline(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	//fmt.Println(tk)
-	if len(tk) != 3 {
-		t.Errorf("expected %d got %d", 3, len(tk))
+	if len(tk) != 5 {
+		t.Errorf("expected %d got %d", 5, len(tk))
+	}
+}
+
+func TestCommon_LexWHitespace(t *testing.T) {
+	src := "   # bar"
+	c := &Common{}
+	l := Lexer{}
+	l.IsBlock = c.IsBlock
+	l.LFunc = c.Lex
+	tk, err := l.Lex([]byte(src))
+	if err != nil {
+		t.Error(err)
+	}
+	if len(tk) != 2 {
+		t.Errorf("expected 2 got %d", len(tk))
 	}
 }
