@@ -1,6 +1,7 @@
 package magic
 
 import (
+	"bytes"
 	"fmt"
 	"unicode"
 	"unicode/utf8"
@@ -33,7 +34,7 @@ func (c *Common) Lex(data []byte, currPos int) (int, *Token, error) {
 //LexParagraph lexes commonmark paragraph
 func (c *Common) LexParagraph(data []byte, currPos int) (int, *Token, error) {
 	end := currPos
-	txt := ""
+	txt := &bytes.Buffer{}
 STOP:
 	for {
 		if end > len(data)-1 {
@@ -42,7 +43,7 @@ STOP:
 		ch, size := utf8.DecodeRune(data[end:])
 		switch ch {
 		case '\n', '\r':
-			txt += string(ch)
+			txt.WriteRune(ch)
 			end += size
 			if end > len(data)-1 {
 				break STOP
@@ -52,34 +53,34 @@ STOP:
 			case '\r', '\n':
 				break STOP
 			default:
-				txt += string(ch)
+				txt.WriteRune(ch)
 				end += nsize
 			}
 
 		default:
-			txt += string(ch)
+			txt.WriteRune(ch)
 			end += size
 		}
 	}
 	t :=
-		&Token{Kind: Paragraph, Begin: currPos, End: end, Text: txt}
+		&Token{Kind: Paragraph, Begin: currPos, End: end, Text: txt.Bytes()}
 	return end, t, nil
 }
 
 //LexATXHeading lexes commonmark ATXHeading
 func (c *Common) LexATXHeading(data []byte, currPos int) (int, *Token, error) {
 	end := currPos
-	txt := ""
+	txt := &bytes.Buffer{}
 	ch, size := utf8.DecodeRune(data[end:])
 	if ch == '#' {
 
 		end += size
-		txt += string(ch)
+		txt.WriteRune(ch)
 		next, nsize := utf8.DecodeRune(data[end:])
 		switch next {
 		case ' ':
 			end += nsize
-			txt += string(next)
+			txt.WriteRune(next)
 			goto STOP
 		case '#':
 			match := 2
@@ -88,10 +89,10 @@ func (c *Common) LexATXHeading(data []byte, currPos int) (int, *Token, error) {
 				hch, hsize := utf8.DecodeRune(data[end:])
 				switch hch {
 				case ' ':
-					txt += string(hch)
+					txt.WriteRune(hch)
 					end += hsize
 				case '#':
-					txt += string(hch)
+					txt.WriteRune(hch)
 					end += hsize
 					match++
 				default:
@@ -111,15 +112,15 @@ func (c *Common) LexATXHeading(data []byte, currPos int) (int, *Token, error) {
 			switch tch {
 			case '\r', '\n':
 				end += tsize
-				txt += string(tch)
+				txt.WriteRune(tch)
 				break STOP
 			default:
 				end += tsize
-				txt += string(tch)
+				txt.WriteRune(tch)
 			}
 		}
 		t :=
-			&Token{Kind: ATXHeading, Begin: currPos, End: end, Text: txt}
+			&Token{Kind: ATXHeading, Begin: currPos, End: end, Text: txt.Bytes()}
 		return end, t, nil
 	}
 	//fmt.Println("HERE", string(data[currPos:]))
@@ -141,7 +142,7 @@ func (c *Common) LexBlankline(data []byte, currPos int) (int, *Token, error) {
 	if ch == '\r' || ch == '\n' {
 		end += size
 		t :=
-			&Token{Kind: Blankline, Begin: currPos, End: end, Text: string(ch)}
+			&Token{Kind: Blankline, Begin: currPos, End: end, Text: []byte(string(ch))}
 		return end, t, nil
 	}
 	return len(data), nil, fmt.Errorf(" at %d txt: %s  failed to lex blankline", currPos, string(ch))
@@ -174,14 +175,14 @@ func (c *Common) LexWHitespace(data []byte, currPos int) (int, *Token, error) {
 	t :=
 		&Token{Kind: Whitespace, Begin: currPos, End: end}
 	for _, v := range chars {
-		t.Text += string(v)
+		t.Text = append(t.Text, []byte(string(v))...)
 	}
 	return end, t, nil
 }
 
 func (c *Common) LexIndentCode(data []byte, currPos int) (int, *Token, error) {
 	end := currPos
-	txt := ""
+	txt := &bytes.Buffer{}
 STOP:
 	for {
 		if end > len(data)-1 {
@@ -190,15 +191,15 @@ STOP:
 		ch, size := utf8.DecodeRune(data[end:])
 		switch ch {
 		case '\n', '\r':
-			txt += string(ch)
+			txt.WriteRune(ch)
 			end += size
 			break STOP
 		default:
-			txt += string(ch)
+			txt.WriteRune(ch)
 			end += size
 		}
 	}
 	t :=
-		&Token{Kind: IndentCode, Begin: currPos, End: end, Text: txt}
+		&Token{Kind: IndentCode, Begin: currPos, End: end, Text: txt.Bytes()}
 	return end, t, nil
 }

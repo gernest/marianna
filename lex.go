@@ -90,13 +90,13 @@ func (k TokenKind) String() string {
 //Token identifies a chunk of tex or a character with important meaning
 type Token struct {
 	Kind  TokenKind
-	Text  string
+	Text  []byte
 	Begin int
 	End   int
 }
 
 func (t *Token) String() string {
-	return fmt.Sprintf(" %s [ %d : %d] %s", t.Kind, t.Begin, t.End, t.Text)
+	return fmt.Sprintf(" %s [ %d : %d]", t.Kind, t.Begin, t.End)
 }
 
 //LexFunc a function interface for lexing text inputs
