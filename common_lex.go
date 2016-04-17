@@ -160,6 +160,9 @@ func (c *Common) LexWHitespace(data []byte, currPos int) (int, *Token, error) {
 		if ch == ' ' {
 			chars = append(chars, ch)
 			end += size
+			if len(chars) == 4 {
+				break
+			}
 			continue
 		}
 		break
