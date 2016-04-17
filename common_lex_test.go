@@ -49,6 +49,6 @@ func TestCommon_LexBlankline(t *testing.T) {
 	}
 	//fmt.Println(tk)
 	if len(tk) != 3 {
-		t.Errorf("expected %s got %s", 3, len(tk))
+		t.Errorf("expected %d got %d", 3, len(tk))
 	}
 }
