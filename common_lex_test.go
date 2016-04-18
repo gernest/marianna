@@ -182,3 +182,21 @@ func TestCommon_LexSetextHeader(t *testing.T) {
 		t.Errorf("expected 3 got %d", len(tk))
 	}
 }
+
+func TestCommon_LexCodeFence(t *testing.T) {
+	b, err := ioutil.ReadFile("fixture/lex/code.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := &Common{}
+	l := Lexer{}
+	l.IsBlock = c.IsBlock
+	l.LFunc = c.Lex
+	tk, err := l.Lex(b)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(tk) != 4 {
+		t.Errorf("expected 4 got %d", len(tk))
+	}
+}

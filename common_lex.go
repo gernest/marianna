@@ -26,6 +26,18 @@ func (c *Common) Lex(data []byte, currPos int) (int, *Token, error) {
 		return c.LexBlankline(data, currPos)
 	case ' ':
 		return c.LexWHitespace(data, currPos)
+	case '`':
+		_, n := consecutive(data[currPos:], '`')
+		if n > 3 {
+			break
+		}
+		return c.LexCodeFence(data, currPos)
+	case '~':
+		_, n := consecutive(data[currPos:], '~')
+		if n > 3 {
+			break
+		}
+		return c.LexCodeFence(data, currPos)
 	}
 
 	return c.LexParagraph(data, currPos)
@@ -330,4 +342,22 @@ STOP:
 	t :=
 		&Token{Kind: IndentCode, Begin: currPos, End: end, Text: txt.Bytes()}
 	return end, t, nil
+}
+
+func (c *Common) LexCodeFence(data []byte, currPos int) (int, *Token, error) {
+	var marker []byte
+	end := currPos
+	ch, _ := utf8.DecodeRune(data[currPos:])
+	i, n := consecutive(data[end:], ch)
+	for _ = range make([]struct{}, n) {
+		marker = append(marker, []byte(string(ch))...)
+	}
+	index := bytes.Index(data[end+i:], marker)
+	if index > 0 {
+		end += index + i + len(marker)
+		t :=
+			&Token{Kind: FencedCode, Begin: currPos, End: end, Text: data[currPos:end]}
+		return end, t, nil
+	}
+	return c.LexParagraph(data, currPos)
 }
