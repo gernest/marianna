@@ -160,7 +160,7 @@ func TestCOnsecutive(t *testing.T) {
 	for _, v := range sample {
 		_, n := consecutive([]byte(v.src), v.ch)
 		if n != v.occur {
-			t.Errorf("expected %s got %s", v.occur, n)
+			t.Errorf("expected %d got %d", v.occur, n)
 		}
 	}
 }
