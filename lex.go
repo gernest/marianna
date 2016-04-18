@@ -12,7 +12,7 @@ type TokenKind int
 const (
 	Break TokenKind = iota
 	ATXHeading
-	SelectHeading
+	SetextHeading
 	IndentCode
 	FencedCode
 	HTML
@@ -41,8 +41,8 @@ func (k TokenKind) String() string {
 		return "Break"
 	case ATXHeading:
 		return "ATXHeading"
-	case SelectHeading:
-		return "SelectHeading"
+	case SetextHeading:
+		return "SetextHeading"
 	case IndentCode:
 		return "IndentCode"
 	case FencedCode:

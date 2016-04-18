@@ -35,16 +35,27 @@ func (c *Common) Lex(data []byte, currPos int) (int, *Token, error) {
 func (c *Common) LexParagraph(data []byte, currPos int) (int, *Token, error) {
 	end := currPos
 	txt := &bytes.Buffer{}
+	lines := 0
+	var setext *Token
 STOP:
 	for {
 		if end > len(data)-1 {
 			break STOP
 		}
 		ch, size := utf8.DecodeRune(data[end:])
+		if lines == 1 {
+			hi, ok := IsSetextHeader(data, end)
+			if ok {
+				setext =
+					&Token{Begin: currPos, End: hi, Kind: SetextHeading, Text: data[currPos:hi]}
+				break STOP
+			}
+		}
 		switch ch {
 		case '\n', '\r':
 			_, _ = txt.WriteRune(ch)
 			end += size
+			lines++
 			if end > len(data)-1 {
 				break STOP
 			}
@@ -62,9 +73,124 @@ STOP:
 			end += size
 		}
 	}
+	if setext != nil {
+		return setext.End, setext, nil
+	}
 	t :=
 		&Token{Kind: Paragraph, Begin: currPos, End: end, Text: txt.Bytes()}
 	return end, t, nil
+}
+
+func IsSetextHeader(data []byte, currPos int) (index int, ok bool) {
+	end := currPos
+STOP:
+	for {
+	restart:
+		ch, size := utf8.DecodeRune(data[end:])
+		switch ch {
+		case '-':
+			fmt.Println("here")
+			h, _ := consecutive(data[end:], '-')
+			// up to the end of imput
+			if end+h > len(data)-1 {
+				ok = true
+				index = end + h
+				break STOP
+			}
+
+			// followed by the end of the line marker
+			e, esize := utf8.DecodeRune(data[end+h:])
+			if e == '\r' || e == '\n' {
+				ok = true
+				index = end + h + esize
+				break STOP
+			}
+			// or followed by space then the end of the line marker
+			cSpace, n := consecutive(data[end:], ' ')
+			if n > 0 {
+
+				// space then end of input is oaky
+				if end+h+cSpace > len(data)-1 {
+					ok = true
+					index = end + h + cSpace
+					break STOP
+				}
+
+				e, esize = utf8.DecodeRune(data[end+h+cSpace:])
+				if e == '\r' || e == '\n' {
+					ok = true
+					index = end + h + cSpace + esize
+					break STOP
+				}
+			}
+			break STOP
+
+		case '=':
+
+			h, _ := consecutive(data[end:], '=')
+			// up to the end of imput
+			if end+h > len(data)-1 {
+				ok = true
+				index = end + h
+				break STOP
+			}
+
+			// followed by the end of the line marker
+			e, esize := utf8.DecodeRune(data[end+h:])
+			if e == '\r' || e == '\n' {
+				ok = true
+				index = end + h + esize
+				break STOP
+			}
+			// or followed by space then the end of the line marker
+			cSpace, n := consecutive(data[end:], ' ')
+			if n > 0 {
+
+				// space then end of input is oaky
+				if end+h+cSpace > len(data)-1 {
+					ok = true
+					index = end + h + cSpace
+					break STOP
+				}
+
+				e, esize = utf8.DecodeRune(data[end+h+cSpace:])
+				if e == '\r' || e == '\n' {
+					ok = true
+					index = end + h + cSpace + esize
+					break STOP
+				}
+			}
+			break STOP
+		case ' ':
+			cSpace, n := consecutive(data[end:], ' ')
+			if n > 3 {
+				break STOP
+			}
+			end += cSpace
+			goto restart
+		case '\r', '\n':
+			end += size
+		default:
+			break STOP
+		}
+	}
+	return
+}
+
+//consecutive returns the index, and number of consecutive ch in src
+func consecutive(src []byte, ch rune) (index int, occurane int) {
+	for {
+		if index > len(src)-1 {
+			break
+		}
+		char, s := utf8.DecodeRune(src[index:])
+		if char != ch {
+			break
+		}
+		index += s
+		occurane++
+	}
+	return
 }
 
 //LexATXHeading lexes commonmark ATXHeading

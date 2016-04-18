@@ -144,5 +144,43 @@ func TestCommon_LexIndentCode(t *testing.T) {
 	if len(tk) != 2 {
 		t.Errorf("expected 2 got %d", len(tk))
 	}
+}
+
+func TestCOnsecutive(t *testing.T) {
+	sample := []struct {
+		src   string
+		occur int
+		ch    rune
+	}{
+		{"---   ", 3, '-'},
+		{"   ", 3, ' '},
+		{"====\n", 4, '='},
+	}
+
+	for _, v := range sample {
+		_, n := consecutive([]byte(v.src), v.ch)
+		if n != v.occur {
+			t.Errorf("expected %s got %s", v.occur, n)
+		}
+	}
+}
+
+func TestCommon_LexSetextHeader(t *testing.T) {
+	src := `foo bar
+	===========
+
+	foo bar
+	----------`
+	c := &Common{}
+	l := Lexer{}
+	l.IsBlock = c.IsBlock
+	l.LFunc = c.Lex
+	tk, err := l.Lex([]byte(src))
+	if err != nil {
+		t.Error(err)
+	}
+	if len(tk) != 3 {
+		t.Errorf("expected 3 got %d", len(tk))
+	}
 	fmt.Println(tk)
 }
