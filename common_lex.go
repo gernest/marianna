@@ -91,7 +91,6 @@ STOP:
 		ch, size := utf8.DecodeRune(data[end:])
 		switch ch {
 		case '-':
-			fmt.Println("here")
 			h, _ := consecutive(data[end:], '-')
 			// up to the end of imput
 			if end+h > len(data)-1 {
