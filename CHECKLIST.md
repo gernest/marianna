@@ -16,3 +16,6 @@
   - [ ] Block Quotes
   - [ ] List items
   - [ ] Lists
+
+- [ ] Inlines
+
