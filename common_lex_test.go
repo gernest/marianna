@@ -1,7 +1,6 @@
 package magic
 
 import (
-	"fmt"
 	"io/ioutil"
 	"testing"
 )
@@ -182,5 +181,4 @@ func TestCommon_LexSetextHeader(t *testing.T) {
 	if len(tk) != 3 {
 		t.Errorf("expected 3 got %d", len(tk))
 	}
-	fmt.Println(tk)
 }
