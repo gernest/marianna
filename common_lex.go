@@ -81,6 +81,8 @@ STOP:
 	return end, t, nil
 }
 
+//IsSetextHeader retturns true if there is a setext haeader in data from the
+//current position
 func IsSetextHeader(data []byte, currPos int) (index int, ok bool) {
 	end := currPos
 STOP:
